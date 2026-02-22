@@ -1696,9 +1696,9 @@ tbody td {
     flex: 1;
     min-height: 0;
     padding: 0 20px 20px;
-    align-items: stretch;
-    gap: 16px;
-    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
 }
 
 .installment-bulk-panel {
@@ -1712,12 +1712,26 @@ tbody td {
 .installment-details-modal-card .installment-bulk-panel {
     margin-bottom: 0;
     border: none;
-    border-radius: 16px;
+    border-radius: 22px;
     padding: 14px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(249, 246, 241, 0.95));
-    box-shadow: 0 14px 28px rgba(33, 27, 20, 0.06);
+    background:
+        radial-gradient(circle at 10% 0%, rgba(132, 157, 185, 0.12), transparent 52%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 244, 238, 0.92));
+    box-shadow:
+        inset 0 0 0 1px rgba(217, 210, 200, 0.42),
+        0 16px 36px rgba(33, 27, 20, 0.08);
     position: sticky;
-    top: 0;
+    top: 2px;
+    align-self: start;
+}
+
+.installment-details-modal-card .installment-bulk-panel::before {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, rgba(109, 128, 148, 0.34), rgba(109, 128, 148, 0.06));
+    border-radius: 999px;
 }
 
 .installment-bulk-grid {
@@ -1728,12 +1742,33 @@ tbody td {
 }
 
 .installment-details-modal-card .installment-bulk-grid {
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.installment-details-modal-card .installment-bulk-grid label {
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(205, 197, 186, 0.46);
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .installment-details-modal-card .installment-bulk-grid .btn {
-    min-height: 44px;
+    width: 100%;
+    min-height: 46px;
     justify-content: center;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.installment-details-modal-card .installment-bulk-grid > .btn:nth-of-type(1) {
+    background: rgba(255, 255, 255, 0.42);
+}
+
+.installment-details-modal-card .installment-bulk-grid > .btn:nth-of-type(2) {
+    box-shadow: 0 10px 18px rgba(84, 109, 139, 0.2);
 }
 
 .details-table-wrap {
@@ -1745,19 +1780,93 @@ tbody td {
     max-height: none;
     height: 100%;
     border: none;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.82);
-    box-shadow: 0 14px 28px rgba(33, 27, 20, 0.06);
+    border-radius: 22px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(250, 246, 241, 0.78));
+    box-shadow:
+        inset 0 0 0 1px rgba(217, 210, 200, 0.42),
+        0 16px 36px rgba(33, 27, 20, 0.08);
+    position: relative;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(118, 128, 142, 0.6) transparent;
 }
 
 .details-table-wrap table {
     min-width: 980px;
 }
 
+.installment-details-modal-card .details-table-wrap::before,
+.installment-details-modal-card .details-table-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 12px;
+    width: 16px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.installment-details-modal-card .details-table-wrap::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(248, 245, 240, 0.7), rgba(248, 245, 240, 0));
+}
+
+.installment-details-modal-card .details-table-wrap::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(248, 245, 240, 0.7), rgba(248, 245, 240, 0));
+}
+
+.installment-details-modal-card .details-table-wrap::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.installment-details-modal-card .details-table-wrap::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 999px;
+}
+
+.installment-details-modal-card .details-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(118, 128, 142, 0.48);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+
+.installment-details-modal-card .details-table-wrap:hover::-webkit-scrollbar-thumb {
+    background: rgba(104, 115, 129, 0.72);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.installment-details-modal-card .details-table-wrap::-webkit-scrollbar-thumb:active {
+    background: rgba(86, 97, 111, 0.85);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.installment-details-modal-card .details-table-wrap::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 .installment-details-modal-card .details-table-wrap thead th {
     position: sticky;
     top: 0;
     z-index: 2;
+    background: rgba(248, 245, 240, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(210, 202, 191, 0.42);
+}
+
+.installment-details-modal-card .details-table-wrap tbody tr {
+    border-top-color: rgba(205, 198, 188, 0.42);
+}
+
+.installment-details-modal-card .details-table-wrap tbody tr:hover {
+    background: rgba(255, 255, 255, 0.35);
 }
 
 #installmentDetailsModal.modal-expanded {
@@ -1773,7 +1882,7 @@ tbody td {
 }
 
 #installmentDetailsModal.modal-expanded .container-payment-details {
-    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
 }
 
 .installment-progress {
@@ -2518,14 +2627,70 @@ body.theme-dark .installment-details-modal-card .modal-head {
 
 body.theme-dark .installment-details-modal-card .installment-bulk-panel {
     border: none;
-    background: linear-gradient(180deg, rgba(39, 43, 43, 0.94), rgba(35, 39, 39, 0.94));
-    box-shadow: 0 14px 28px rgba(7, 8, 8, 0.22);
+    background:
+        radial-gradient(circle at 12% 0%, rgba(117, 148, 181, 0.14), transparent 52%),
+        linear-gradient(180deg, rgba(39, 43, 43, 0.94), rgba(35, 39, 39, 0.94));
+    box-shadow:
+        inset 0 0 0 1px rgba(97, 104, 104, 0.34),
+        0 14px 28px rgba(7, 8, 8, 0.22);
+}
+
+body.theme-dark .installment-details-modal-card .installment-bulk-panel::before {
+    background: linear-gradient(90deg, rgba(148, 173, 202, 0.32), rgba(148, 173, 202, 0.06));
+}
+
+body.theme-dark .installment-details-modal-card .installment-bulk-grid label {
+    border-color: rgba(88, 95, 95, 0.62);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 body.theme-dark .installment-details-modal-card .details-table-wrap {
     border: none;
     background: rgba(34, 37, 37, 0.84);
-    box-shadow: 0 14px 28px rgba(7, 8, 8, 0.22);
+    box-shadow:
+        inset 0 0 0 1px rgba(97, 104, 104, 0.34),
+        0 14px 28px rgba(7, 8, 8, 0.22);
+    scrollbar-color: rgba(173, 185, 198, 0.52) transparent;
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap::before {
+    background: linear-gradient(90deg, rgba(33, 36, 36, 0.78), rgba(33, 36, 36, 0));
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap::after {
+    background: linear-gradient(270deg, rgba(33, 36, 36, 0.78), rgba(33, 36, 36, 0));
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(176, 187, 199, 0.42);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap:hover::-webkit-scrollbar-thumb {
+    background: rgba(188, 199, 211, 0.66);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap::-webkit-scrollbar-thumb:active {
+    background: rgba(205, 215, 224, 0.82);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap thead th {
+    background: rgba(41, 45, 45, 0.86);
+    border-bottom-color: rgba(89, 96, 96, 0.42);
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap tbody tr {
+    border-top-color: rgba(87, 94, 94, 0.34);
+}
+
+body.theme-dark .installment-details-modal-card .details-table-wrap tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
 }
 
 body.theme-dark .receipt-preview-area,
