@@ -1086,6 +1086,7 @@ body.sidebar-collapsed.theme-dark .menu-item[data-tab]:hover i {
 }
 
 .filter-field {
+    min-width: 0;
     gap: 6px;
     font-size: 12px;
     text-transform: uppercase;
@@ -1094,6 +1095,7 @@ body.sidebar-collapsed.theme-dark .menu-item[data-tab]:hover i {
 
 .filter-field input,
 .filter-field select {
+    min-width: 0;
     text-transform: none;
     letter-spacing: normal;
     font-size: 13px;
@@ -2817,6 +2819,18 @@ body.theme-dark .payable-calendar-day.is-paid {
     .modal-card {
         width: min(720px, 100%);
         max-height: calc(100vh - 20px);
+    }
+}
+
+@media (min-width: 761px) and (max-width: 1240px) {
+    .filter-grid-reports > :nth-child(5),
+    .filter-grid-reports > :nth-child(6) {
+        grid-column: 1 / -1;
+    }
+
+    .filter-grid-reports > :nth-child(5) input,
+    .filter-grid-reports > :nth-child(6) input {
+        width: 100%;
     }
 }
 
