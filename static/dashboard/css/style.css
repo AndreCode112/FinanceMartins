@@ -114,7 +114,7 @@ body.theme-dark .glow-right {
 
 .layout {
     position: relative;
-    z-index: 2;
+    z-index: auto;
     max-width: 1680px;
     margin: 0 auto;
     min-height: 100vh;
@@ -174,13 +174,11 @@ body.theme-dark .sidebar-backdrop {
     min-height: calc(100vh - 48px);
     display: flex;
     flex-direction: column;
-    background:
-        radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.9), transparent 52%),
-        linear-gradient(162deg, rgba(255, 255, 255, 0.9), rgba(245, 241, 236, 0.97));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 242, 236, 0.96));
     border: 1px solid rgba(201, 192, 180, 0.78);
     border-radius: var(--radius-xl);
     padding: 28px;
-    box-shadow: 0 26px 58px rgba(44, 39, 31, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 46px rgba(44, 39, 31, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(10px);
     overflow: hidden;
     contain: layout paint;
@@ -192,9 +190,8 @@ body.theme-dark .sidebar-backdrop {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(circle at 88% 14%, rgba(95, 109, 124, 0.12), transparent 46%),
-        radial-gradient(circle at 12% 88%, rgba(128, 114, 94, 0.06), transparent 50%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 22%);
+    opacity: 0.75;
     pointer-events: none;
 }
 
@@ -232,8 +229,8 @@ body.theme-dark .sidebar-backdrop {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-color: rgba(196, 188, 176, 0.84);
-    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(196, 188, 176, 0.7);
+    background: rgba(255, 255, 255, 0.68);
 }
 
 .sidebar-toggle-btn i {
@@ -256,8 +253,8 @@ body.theme-dark .sidebar-backdrop {
     width: 12px;
     height: 12px;
     border-radius: 999px;
-    background: linear-gradient(125deg, #4b5c6c, #7f91a4);
-    box-shadow: 0 0 0 6px rgba(81, 95, 110, 0.1), 0 0 18px rgba(81, 95, 110, 0.2);
+    background: #617486;
+    box-shadow: 0 0 0 6px rgba(81, 95, 110, 0.09);
 }
 
 .brand-copy {
@@ -279,7 +276,7 @@ body.theme-dark .sidebar-backdrop {
 .sidebar-sep {
     margin: 20px 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(173, 164, 151, 0.18), rgba(173, 164, 151, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(173, 164, 151, 0.12), rgba(173, 164, 151, 0.32), transparent);
     position: relative;
     z-index: 1;
 }
@@ -331,9 +328,9 @@ body.theme-dark .sidebar-backdrop {
 
 .user-dropdown-trigger {
     width: 100%;
-    border: 1px solid rgba(195, 186, 172, 0.78);
+    border: 1px solid rgba(195, 186, 172, 0.66);
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(249, 246, 241, 0.8));
+    background: rgba(255, 255, 255, 0.66);
     color: var(--text-main);
     padding: 10px 11px;
     display: grid;
@@ -341,7 +338,7 @@ body.theme-dark .sidebar-backdrop {
     align-items: center;
     gap: 9px;
     cursor: pointer;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     transition: width var(--sidebar-motion) var(--sidebar-motion-ease),
         padding var(--sidebar-motion) var(--sidebar-motion-ease),
         gap var(--sidebar-motion) var(--sidebar-motion-ease),
@@ -443,20 +440,18 @@ body.theme-dark .sidebar-backdrop {
 .sidebar-logout-btn {
     width: 100%;
     justify-content: center;
-    background: linear-gradient(130deg, #5f4f4f, #7a6662);
+    background: #6a5b58;
     color: #fff;
-    box-shadow: 0 10px 22px rgba(95, 79, 79, 0.22);
+    box-shadow: 0 8px 18px rgba(95, 79, 79, 0.16);
     border-radius: 12px;
     font-size: 12px;
     padding: 10px 12px;
 }
 
 body.theme-dark .sidebar {
-    background:
-        radial-gradient(circle at 16% 10%, rgba(53, 58, 58, 0.52), transparent 52%),
-        linear-gradient(160deg, rgba(32, 36, 36, 0.95), rgba(24, 28, 28, 0.97));
+    background: linear-gradient(180deg, rgba(31, 35, 35, 0.95), rgba(25, 28, 28, 0.97));
     border-color: rgba(86, 92, 92, 0.74);
-    box-shadow: 0 28px 58px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(110, 116, 116, 0.12);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(110, 116, 116, 0.1);
 }
 
 body.theme-dark .mobile-sidebar-trigger.icon-btn {
@@ -467,9 +462,7 @@ body.theme-dark .mobile-sidebar-trigger.icon-btn {
 }
 
 body.theme-dark .sidebar::before {
-    background:
-        radial-gradient(circle at 88% 14%, rgba(144, 156, 150, 0.14), transparent 48%),
-        radial-gradient(circle at 10% 88%, rgba(95, 103, 100, 0.1), transparent 48%);
+    background: linear-gradient(180deg, rgba(120, 130, 126, 0.08), transparent 22%);
 }
 
 body.theme-dark .sidebar::after {
@@ -477,26 +470,14 @@ body.theme-dark .sidebar::after {
 }
 
 body.theme-dark .brand-dot {
-    background: linear-gradient(125deg, #7e8a86, #98a49f);
-    box-shadow: 0 0 0 5px rgba(126, 138, 134, 0.16);
+    background: #8d9994;
+    box-shadow: 0 0 0 5px rgba(126, 138, 134, 0.14);
 }
 
 body.theme-dark .menu-item i {
-    border-color: rgba(88, 95, 95, 0.8);
-    background: rgba(46, 50, 50, 0.9);
+    border-color: rgba(88, 95, 95, 0.64);
+    background: rgba(46, 50, 50, 0.58);
     color: #bac2bd;
-}
-
-body.theme-dark .menu-item.active,
-body.theme-dark .menu-item[data-tab]:hover {
-    background: rgba(138, 149, 144, 0.12);
-    border-color: rgba(138, 149, 144, 0.26);
-}
-
-body.theme-dark .menu-item.active i,
-body.theme-dark .menu-item[data-tab]:hover i {
-    background: linear-gradient(135deg, #7c8884, #9ca8a2);
-    color: #111313;
 }
 
 body.theme-dark .theme-toggle-btn {
@@ -506,9 +487,9 @@ body.theme-dark .theme-toggle-btn {
 }
 
 body.theme-dark .user-dropdown-trigger {
-    background: linear-gradient(180deg, rgba(42, 46, 46, 0.92), rgba(37, 40, 40, 0.9));
-    border-color: rgba(81, 88, 88, 0.84);
-    box-shadow: inset 0 1px 0 rgba(125, 132, 132, 0.08);
+    background: rgba(41, 45, 45, 0.72);
+    border-color: rgba(81, 88, 88, 0.72);
+    box-shadow: inset 0 1px 0 rgba(125, 132, 132, 0.05);
 }
 
 body.theme-dark .user-avatar {
@@ -528,9 +509,9 @@ body.theme-dark .user-dropdown-trigger:focus-visible {
 }
 
 body.theme-dark .sidebar-logout-btn {
-    background: linear-gradient(130deg, #8e7373, #aa8a8a);
-    color: #121313;
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+    background: #8f7a76;
+    color: #151616;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
 }
 
 .menu-item {
@@ -541,12 +522,10 @@ body.theme-dark .sidebar-logout-btn {
     color: var(--text-soft);
     border-radius: 16px;
     padding: 10px 12px;
-    border: 1px solid rgba(194, 186, 173, 0);
-    background: rgba(255, 255, 255, 0.18);
-    overflow: hidden;
+    border: 1px solid transparent;
+    background: transparent;
     transition: background-color var(--sidebar-motion-fast) ease, border-color var(--sidebar-motion-fast) ease,
-        color var(--sidebar-motion-fast) ease, transform var(--sidebar-motion-fast) ease,
-        box-shadow var(--sidebar-motion-fast) ease,
+        color var(--sidebar-motion-fast) ease, box-shadow var(--sidebar-motion-fast) ease,
         width var(--sidebar-motion) var(--sidebar-motion-ease),
         padding var(--sidebar-motion) var(--sidebar-motion-ease);
     cursor: pointer;
@@ -554,31 +533,21 @@ body.theme-dark .sidebar-logout-btn {
 }
 
 .menu-item::before {
-    content: "";
-    position: absolute;
-    left: 7px;
-    top: 9px;
-    bottom: 9px;
-    width: 3px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #5f7388, #7f92a6);
-    opacity: 0;
-    transform: scaleY(0.6);
-    transition: opacity var(--sidebar-motion-fast) ease, transform var(--sidebar-motion-fast) ease;
+    display: none;
 }
 
 .menu-item i {
     width: 36px;
     height: 36px;
-    border-radius: 13px;
-    border: 1px solid rgba(193, 184, 170, 0.72);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(243, 240, 234, 0.9));
+    border-radius: 12px;
+    border: 1px solid rgba(193, 184, 170, 0.54);
+    background: rgba(255, 255, 255, 0.58);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     color: #4f5f70;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    box-shadow: none;
     transition: background var(--sidebar-motion-fast) ease, color var(--sidebar-motion-fast) ease,
         border-color var(--sidebar-motion-fast) ease, box-shadow var(--sidebar-motion-fast) ease,
         transform var(--sidebar-motion-fast) ease;
@@ -605,25 +574,53 @@ body.sidebar-animating .layout {
 
 .menu-item.active,
 .menu-item[data-tab]:hover {
-    background: linear-gradient(180deg, rgba(87, 102, 117, 0.08), rgba(87, 102, 117, 0.12));
-    border-color: rgba(99, 113, 128, 0.2);
+    background: rgba(87, 102, 117, 0.05);
+    border-color: rgba(99, 113, 128, 0.12);
     color: var(--text-main);
-    box-shadow: 0 8px 18px rgba(76, 68, 58, 0.06);
-    transform: translateX(2px);
+    box-shadow: none;
 }
 
-.menu-item.active::before,
-.menu-item[data-tab]:hover::before {
-    opacity: 1;
-    transform: scaleY(1);
+.menu-item.active {
+    background: rgba(87, 102, 117, 0.08);
+    border-color: rgba(99, 113, 128, 0.18);
 }
 
 .menu-item.active i,
 .menu-item[data-tab]:hover i {
-    background: linear-gradient(135deg, #4d5f70, #687d92);
-    color: #fff;
+    background: rgba(77, 95, 112, 0.08);
+    color: #4d5f70;
+    border-color: rgba(99, 113, 128, 0.18);
+    box-shadow: none;
+}
+
+.menu-item.active i {
+    background: rgba(77, 95, 112, 0.12);
+    border-color: rgba(99, 113, 128, 0.24);
+}
+
+body.theme-dark .menu-item {
+    background: transparent;
     border-color: transparent;
-    box-shadow: 0 10px 18px rgba(77, 95, 112, 0.22);
+}
+
+body.theme-dark .menu-item.active,
+body.theme-dark .menu-item[data-tab]:hover {
+    background: rgba(138, 149, 144, 0.07);
+    border-color: rgba(138, 149, 144, 0.16);
+    box-shadow: none;
+}
+
+body.theme-dark .menu-item.active {
+    background: rgba(138, 149, 144, 0.1);
+    border-color: rgba(138, 149, 144, 0.22);
+}
+
+body.theme-dark .menu-item.active i,
+body.theme-dark .menu-item[data-tab]:hover i {
+    background: rgba(138, 149, 144, 0.12);
+    color: #dbe2dd;
+    border-color: rgba(138, 149, 144, 0.22);
+    box-shadow: none;
 }
 
 .menu-item:not([data-tab]) {
@@ -767,7 +764,7 @@ body.sidebar-collapsed .menu-item[data-tab]:hover {
 
 body.sidebar-collapsed .menu-item.active i,
 body.sidebar-collapsed .menu-item[data-tab]:hover i {
-    box-shadow: 0 10px 20px rgba(77, 95, 112, 0.24);
+    box-shadow: none;
 }
 
 body.sidebar-collapsed .sidebar-controls,
@@ -809,7 +806,7 @@ body.sidebar-collapsed .menu-item span {
 
 body.sidebar-collapsed.theme-dark .menu-item.active i,
 body.sidebar-collapsed.theme-dark .menu-item[data-tab]:hover i {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.36);
+    box-shadow: none;
 }
 
 .tab-content {
