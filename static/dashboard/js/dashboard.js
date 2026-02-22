@@ -67,15 +67,16 @@ const userDropdown = document.getElementById("userDropdown");
 const userDropdownTrigger = document.getElementById("userDropdownTrigger");
 const userDropdownMenu = document.getElementById("userDropdownMenu");
 const dashboardLayoutContainer = document.getElementById("dashboardLayout");
+const calendarLayoutContainer = document.getElementById("calendarLayout");
+const payablesLayoutContainer = document.getElementById("payablesLayout");
+const banksLayoutContainer = document.getElementById("banksLayout");
 const sidebarCollapsedStorageKey = "financepulse:sidebar-collapsed";
 const dashboardLayoutStorageKey = "financepulse:dashboard-layout";
+const calendarLayoutStorageKey = "financepulse:calendar-layout";
+const payablesLayoutStorageKey = "financepulse:payables-layout";
+const banksLayoutStorageKey = "financepulse:banks-layout";
 const themeModeStorageKey = "financepulse:theme-mode";
 let sidebarAnimationTimeoutId = null;
-let draggedDashboardWidgetId = null;
-let canDragWidgetId = null;
-let pendingDragPointerY = null;
-let dragOverFrameId = null;
-let dragCandidateWidgets = [];
 
 const transactionsBody = document.getElementById("transactionsBody");
 const summaryBalance = document.getElementById("summaryBalance");
@@ -563,13 +564,11 @@ const toggleUserDropdown = () => {
     userDropdownTrigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
 };
 
-const getDashboardWidgetElements = () =>
-    dashboardLayoutContainer
-        ? Array.from(dashboardLayoutContainer.querySelectorAll(".dashboard-widget[data-widget-id]"))
-        : [];
+const getLayoutWidgetElements = (container) =>
+    container ? Array.from(container.querySelectorAll(".dashboard-widget[data-widget-id]")) : [];
 
-const normalizeDashboardWidgetOrder = (order) => {
-    const widgetIds = getDashboardWidgetElements().map((widget) => widget.dataset.widgetId);
+const normalizeLayoutWidgetOrder = (container, order) => {
+    const widgetIds = getLayoutWidgetElements(container).map((widget) => widget.dataset.widgetId);
     const normalized = [];
     const source = Array.isArray(order) ? order : [];
     source.forEach((widgetId) => {
@@ -585,41 +584,49 @@ const normalizeDashboardWidgetOrder = (order) => {
     return normalized;
 };
 
-const applyDashboardWidgetOrder = (order) => {
-    if (!dashboardLayoutContainer) {
+const applyLayoutWidgetOrder = (container, order) => {
+    if (!container) {
         return;
     }
-    const normalized = normalizeDashboardWidgetOrder(order);
-    const widgetMap = new Map(getDashboardWidgetElements().map((widget) => [widget.dataset.widgetId, widget]));
+    const normalized = normalizeLayoutWidgetOrder(container, order);
+    const widgetMap = new Map(getLayoutWidgetElements(container).map((widget) => [widget.dataset.widgetId, widget]));
     normalized.forEach((widgetId) => {
         const widget = widgetMap.get(widgetId);
         if (widget) {
-            dashboardLayoutContainer.appendChild(widget);
+            container.appendChild(widget);
         }
     });
 };
 
-const getDashboardWidgetOrder = () => getDashboardWidgetElements().map((widget) => widget.dataset.widgetId);
+const getLayoutWidgetOrder = (container) => getLayoutWidgetElements(container).map((widget) => widget.dataset.widgetId);
 
-const getInitialDashboardWidgetOrder = () => {
-    if (Array.isArray(initialData.dashboard_widget_order) && initialData.dashboard_widget_order.length) {
-        return initialData.dashboard_widget_order;
+const getInitialLayoutWidgetOrder = ({ storageKey, fallbackOrder = [] }) => {
+    if (Array.isArray(fallbackOrder) && fallbackOrder.length) {
+        return fallbackOrder;
     }
     try {
-        const localValue = window.localStorage.getItem(dashboardLayoutStorageKey);
+        const localValue = window.localStorage.getItem(storageKey);
         return localValue ? JSON.parse(localValue) : [];
     } catch (_error) {
         return [];
     }
 };
 
+const saveLayoutWidgetOrderToLocalStorage = (container, storageKey) => {
+    if (!container) {
+        return [];
+    }
+    const order = normalizeLayoutWidgetOrder(container, getLayoutWidgetOrder(container));
+    window.localStorage.setItem(storageKey, JSON.stringify(order));
+    return order;
+};
+
 const saveDashboardWidgetOrder = async () => {
     if (!bodyData.layoutSaveUrl || !dashboardLayoutContainer) {
         return;
     }
-    const order = normalizeDashboardWidgetOrder(getDashboardWidgetOrder());
+    const order = saveLayoutWidgetOrderToLocalStorage(dashboardLayoutContainer, dashboardLayoutStorageKey);
     initialData.dashboard_widget_order = order;
-    window.localStorage.setItem(dashboardLayoutStorageKey, JSON.stringify(order));
 
     try {
         const response = await fetch(bodyData.layoutSaveUrl, {
@@ -643,7 +650,7 @@ const saveDashboardWidgetOrder = async () => {
     }
 };
 
-const getDashboardDropTarget = (candidates, pointerY) => {
+const getWidgetDropTarget = (candidates, pointerY) => {
     let closest = null;
     let closestOffset = Number.NEGATIVE_INFINITY;
     candidates.forEach((candidate) => {
@@ -657,18 +664,24 @@ const getDashboardDropTarget = (candidates, pointerY) => {
     return closest;
 };
 
-const initDashboardDragDrop = () => {
-    if (!dashboardLayoutContainer) {
+const initWidgetLayoutDragDrop = ({ container, storageKey, initialOrder = [], onSave }) => {
+    if (!container) {
         return;
     }
 
-    const initialOrder = getInitialDashboardWidgetOrder();
-    if (initialOrder.length) {
-        applyDashboardWidgetOrder(initialOrder);
+    const resolvedInitialOrder = getInitialLayoutWidgetOrder({ storageKey, fallbackOrder: initialOrder });
+    if (resolvedInitialOrder.length) {
+        applyLayoutWidgetOrder(container, resolvedInitialOrder);
     }
 
+    let draggedWidgetId = null;
+    let canDragWidgetId = null;
+    let pendingDragPointerY = null;
+    let dragOverFrameId = null;
+    let dragCandidateWidgets = [];
+
     const resetDragRuntime = () => {
-        draggedDashboardWidgetId = null;
+        draggedWidgetId = null;
         canDragWidgetId = null;
         pendingDragPointerY = null;
         dragCandidateWidgets = [];
@@ -676,11 +689,11 @@ const initDashboardDragDrop = () => {
             cancelAnimationFrame(dragOverFrameId);
             dragOverFrameId = null;
         }
-        dashboardLayoutContainer.classList.remove("drag-active");
-        getDashboardWidgetElements().forEach((widget) => widget.classList.remove("dragging"));
+        container.classList.remove("drag-active");
+        getLayoutWidgetElements(container).forEach((widget) => widget.classList.remove("dragging"));
     };
 
-    dashboardLayoutContainer.addEventListener("pointerdown", (event) => {
+    container.addEventListener("pointerdown", (event) => {
         const handle = event.target.closest(".widget-drag-handle");
         if (!handle) {
             canDragWidgetId = null;
@@ -694,7 +707,7 @@ const initDashboardDragDrop = () => {
         canDragWidgetId = null;
     });
 
-    dashboardLayoutContainer.addEventListener("dragstart", (event) => {
+    container.addEventListener("dragstart", (event) => {
         const widget = event.target.closest(".dashboard-widget[data-widget-id]");
         if (!widget) {
             return;
@@ -704,22 +717,20 @@ const initDashboardDragDrop = () => {
             return;
         }
 
-        draggedDashboardWidgetId = widget.dataset.widgetId;
+        draggedWidgetId = widget.dataset.widgetId;
         widget.classList.add("dragging");
-        dashboardLayoutContainer.classList.add("drag-active");
-        dragCandidateWidgets = getDashboardWidgetElements().filter(
-            (candidate) => candidate.dataset.widgetId !== draggedDashboardWidgetId
-        );
+        container.classList.add("drag-active");
+        dragCandidateWidgets = getLayoutWidgetElements(container).filter((candidate) => candidate.dataset.widgetId !== draggedWidgetId);
         if (event.dataTransfer) {
             event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData("text/plain", draggedDashboardWidgetId);
+            event.dataTransfer.setData("text/plain", draggedWidgetId);
             event.dataTransfer.dropEffect = "move";
         }
     });
 
-    dashboardLayoutContainer.addEventListener("dragover", (event) => {
+    container.addEventListener("dragover", (event) => {
         event.preventDefault();
-        const draggingWidget = dashboardLayoutContainer.querySelector(".dashboard-widget.dragging");
+        const draggingWidget = container.querySelector(".dashboard-widget.dragging");
         if (!draggingWidget) {
             return;
         }
@@ -734,30 +745,58 @@ const initDashboardDragDrop = () => {
             if (pendingDragPointerY === null) {
                 return;
             }
-            const targetWidget = getDashboardDropTarget(dragCandidateWidgets, pendingDragPointerY);
+            const targetWidget = getWidgetDropTarget(dragCandidateWidgets, pendingDragPointerY);
             if (!targetWidget) {
                 if (draggingWidget.nextElementSibling) {
-                    dashboardLayoutContainer.appendChild(draggingWidget);
+                    container.appendChild(draggingWidget);
                 }
                 return;
             }
             if (targetWidget !== draggingWidget && targetWidget !== draggingWidget.nextElementSibling) {
-                dashboardLayoutContainer.insertBefore(draggingWidget, targetWidget);
+                container.insertBefore(draggingWidget, targetWidget);
             }
         });
     });
 
-    dashboardLayoutContainer.addEventListener("drop", (event) => {
+    container.addEventListener("drop", (event) => {
         event.preventDefault();
-        if (!draggedDashboardWidgetId) {
+        if (!draggedWidgetId) {
             return;
         }
         resetDragRuntime();
-        saveDashboardWidgetOrder();
+        if (typeof onSave === "function") {
+            onSave();
+            return;
+        }
+        saveLayoutWidgetOrderToLocalStorage(container, storageKey);
     });
 
-    dashboardLayoutContainer.addEventListener("dragend", () => {
+    container.addEventListener("dragend", () => {
         resetDragRuntime();
+    });
+};
+
+const initDashboardDragDrop = () => {
+    initWidgetLayoutDragDrop({
+        container: dashboardLayoutContainer,
+        storageKey: dashboardLayoutStorageKey,
+        initialOrder: initialData.dashboard_widget_order,
+        onSave: saveDashboardWidgetOrder,
+    });
+};
+
+const initAdditionalTabsDragDrop = () => {
+    initWidgetLayoutDragDrop({
+        container: calendarLayoutContainer,
+        storageKey: calendarLayoutStorageKey,
+    });
+    initWidgetLayoutDragDrop({
+        container: payablesLayoutContainer,
+        storageKey: payablesLayoutStorageKey,
+    });
+    initWidgetLayoutDragDrop({
+        container: banksLayoutContainer,
+        storageKey: banksLayoutStorageKey,
     });
 };
 
@@ -4689,6 +4728,7 @@ const init = () => {
     initThemeMode();
     initSidebarState();
     initDashboardDragDrop();
+    initAdditionalTabsDragDrop();
     syncBankUiState();
     resetPayableCategoryForm();
     syncPayableBulkActionFields();

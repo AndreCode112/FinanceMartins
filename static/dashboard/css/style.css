@@ -566,6 +566,11 @@ body.sidebar-animating .layout {
     padding-right: 30px;
 }
 
+.dashboard-widget .event-calendar-head,
+.dashboard-widget .payable-calendar-head {
+    padding-right: 38px;
+}
+
 body.sidebar-collapsed .layout {
     grid-template-columns: 96px minmax(0, 1fr);
 }

@@ -295,7 +295,7 @@
                 </div>
             </section>
 
-            <section class="tab-content" data-tab-content="calendar">
+            <section id="calendarLayout" class="tab-content dashboard-layout" data-tab-content="calendar">
                 <header class="topbar">
                     <div>
                         <p class="eyebrow">agenda</p>
@@ -308,7 +308,10 @@
                     </div>
                 </header>
 
-                <section class="cards">
+                <section class="cards dashboard-widget" data-widget-id="summary_cards" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <article class="card">
                         <p>Total de eventos</p>
                         <h3 id="summaryEventTotal">0</h3>
@@ -327,7 +330,10 @@
                     </article>
                 </section>
 
-                <section class="panel filters-panel">
+                <section class="panel filters-panel dashboard-widget" data-widget-id="search_filters" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head panel-head-inline">
                         <h4>Pesquisa e filtros</h4>
                     </div>
@@ -373,7 +379,10 @@
                     </div>
                 </section>
 
-                <section class="panel event-calendar-panel">
+                <section class="panel event-calendar-panel dashboard-widget" data-widget-id="calendar_view" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="event-calendar-head">
                         <div class="event-calendar-nav">
                             <button id="eventPrevBtn" type="button" class="btn btn-ghost">
@@ -389,7 +398,10 @@
                     <div id="eventViewContainer" class="event-view-container"></div>
                 </section>
 
-                <section class="panel reminder-panel">
+                <section class="panel reminder-panel dashboard-widget" data-widget-id="reminders" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head">
                         <h4>Lembretes da agenda</h4>
                         <span id="eventReminderSubtitle">Sem alertas no momento</span>
@@ -398,7 +410,7 @@
                 </section>
             </section>
 
-            <section class="tab-content" data-tab-content="payables">
+            <section id="payablesLayout" class="tab-content dashboard-layout" data-tab-content="payables">
                 <header class="topbar">
                     <div>
                         <p class="eyebrow">contas</p>
@@ -411,7 +423,10 @@
                     </div>
                 </header>
 
-                <section class="cards">
+                <section class="cards dashboard-widget" data-widget-id="summary_cards" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <article class="card">
                         <p>Pendente</p>
                         <h3 id="summaryPayablePending">R$ 0,00</h3>
@@ -430,7 +445,10 @@
                     </article>
                 </section>
 
-                <section class="panel filters-panel">
+                <section class="panel filters-panel dashboard-widget" data-widget-id="search_filters" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head panel-head-inline">
                         <h4>Pesquisa e filtros</h4>
                     </div>
@@ -499,7 +517,10 @@
                     </div>
                 </section>
 
-                <section class="payables-utility-grid">
+                <section class="payables-utility-grid dashboard-widget" data-widget-id="utilities" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <section class="panel">
                         <div class="panel-head panel-head-inline">
                             <h4>Acoes em massa</h4>
@@ -549,7 +570,10 @@
                     </section>
                 </section>
 
-                <section class="panel payable-calendar-panel">
+                <section class="panel payable-calendar-panel dashboard-widget" data-widget-id="payable_calendar" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head">
                         <h4>Calendario de vencimentos</h4>
                         <span id="payableCalendarSelectionLabel">Nenhum dia selecionado</span>
@@ -566,7 +590,10 @@
                     <div id="payableCalendarGrid" class="payable-calendar-grid"></div>
                 </section>
 
-                <section class="panel table-panel">
+                <section class="panel table-panel dashboard-widget" data-widget-id="payables_table" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head">
                         <h4>Lista de contas</h4>
                         <span id="payablesSubtitle">Faturas, assinaturas, dividas e parcelas</span>
@@ -591,7 +618,7 @@
                 </section>
             </section>
 
-            <section class="tab-content" data-tab-content="banks">
+            <section id="banksLayout" class="tab-content dashboard-layout" data-tab-content="banks">
                 <header class="topbar">
                     <div>
                         <p class="eyebrow">cadastro</p>
@@ -604,7 +631,10 @@
                     </div>
                 </header>
 
-                <section class="cards">
+                <section class="cards dashboard-widget" data-widget-id="summary_cards" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <article class="card">
                         <p>Total de bancos</p>
                         <h3 id="summaryBankCount">0</h3>
@@ -623,7 +653,10 @@
                     </article>
                 </section>
 
-                <section class="panel table-panel">
+                <section class="panel table-panel dashboard-widget" data-widget-id="banks_table" draggable="true">
+                    <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                        <i class="ph ph-dots-six-vertical"></i>
+                    </button>
                     <div class="panel-head">
                         <h4>Lista de bancos</h4>
                         <span id="banksSubtitle">Gerencie bancos e icones</span>
