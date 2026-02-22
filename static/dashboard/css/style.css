@@ -2884,6 +2884,16 @@ body.theme-dark .payable-calendar-day.is-paid {
         grid-template-columns: 1fr;
     }
 
+    .filter-grid-reports {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .filter-grid-reports > :nth-child(-n+4),
+    .filter-grid-reports > #exportReportBtn {
+        grid-column: 1 / -1;
+    }
+
     .payable-bulk-grid,
     .payable-category-form,
     .payable-calendar-head {
@@ -3011,6 +3021,17 @@ body.theme-dark .payable-calendar-day.is-paid {
     .modal-actions .btn {
         width: 100%;
         justify-content: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .filter-grid-reports {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-grid-reports > :nth-child(-n+4),
+    .filter-grid-reports > #exportReportBtn {
+        grid-column: auto;
     }
 }
 .container-payment-details {
