@@ -39,9 +39,21 @@
     <div class="atmosphere"></div>
     <div class="glow glow-left"></div>
     <div class="glow glow-right"></div>
+    <button
+        id="mobileSidebarBtn"
+        class="mobile-sidebar-trigger icon-btn"
+        type="button"
+        aria-label="Abrir menu"
+        aria-controls="appSidebar"
+        aria-expanded="false"
+        title="Abrir menu"
+    >
+        <i class="ph ph-list"></i>
+    </button>
+    <button id="sidebarBackdrop" class="sidebar-backdrop" type="button" aria-label="Fechar menu"></button>
 
     <div class="layout">
-        <aside class="sidebar">
+        <aside id="appSidebar" class="sidebar" aria-label="Navegacao principal">
             <div class="sidebar-topbar">
                 <div class="brand">
                     <span class="brand-dot"></span>

@@ -66,6 +66,9 @@ const themeToggleLabel = document.getElementById("themeToggleLabel");
 const userDropdown = document.getElementById("userDropdown");
 const userDropdownTrigger = document.getElementById("userDropdownTrigger");
 const userDropdownMenu = document.getElementById("userDropdownMenu");
+const sidebarElement = document.getElementById("appSidebar");
+const mobileSidebarBtn = document.getElementById("mobileSidebarBtn");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
 const dashboardLayoutContainer = document.getElementById("dashboardLayout");
 const calendarLayoutContainer = document.getElementById("calendarLayout");
 const payablesLayoutContainer = document.getElementById("payablesLayout");
@@ -77,6 +80,7 @@ const payablesLayoutStorageKey = "financepulse:payables-layout";
 const banksLayoutStorageKey = "financepulse:banks-layout";
 const themeModeStorageKey = "financepulse:theme-mode";
 let sidebarAnimationTimeoutId = null;
+let mobileSidebarOpen = false;
 
 const transactionsBody = document.getElementById("transactionsBody");
 const summaryBalance = document.getElementById("summaryBalance");
@@ -463,6 +467,51 @@ const triggerSuccessFeedback = (element) => {
     }, 760);
 };
 
+const isSidebarDrawerViewport = () => window.innerWidth <= 1240;
+
+const syncMobileSidebarUi = () => {
+    const isMobile = isSidebarDrawerViewport();
+    const isOpen = isMobile && mobileSidebarOpen;
+    document.body.classList.toggle("mobile-sidebar-open", isOpen);
+
+    if (mobileSidebarBtn) {
+        mobileSidebarBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        mobileSidebarBtn.title = isOpen ? "Fechar menu" : "Abrir menu";
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.setAttribute("aria-hidden", isOpen ? "false" : "true");
+        sidebarBackdrop.tabIndex = isOpen ? 0 : -1;
+    }
+
+    if (sidebarElement) {
+        sidebarElement.setAttribute("aria-hidden", isMobile && !isOpen ? "true" : "false");
+    }
+
+    if (toggleSidebarBtn) {
+        if (isMobile) {
+            toggleSidebarBtn.setAttribute("aria-pressed", isOpen ? "true" : "false");
+            toggleSidebarBtn.title = isOpen ? "Fechar menu" : "Abrir menu";
+            return;
+        }
+        const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+        toggleSidebarBtn.setAttribute("aria-pressed", isCollapsed ? "true" : "false");
+        toggleSidebarBtn.title = isCollapsed ? "Expandir menu" : "Recolher menu";
+    }
+};
+
+const setMobileSidebarOpen = (open) => {
+    mobileSidebarOpen = Boolean(open);
+    if (mobileSidebarOpen) {
+        closeUserDropdown();
+    }
+    syncMobileSidebarUi();
+};
+
+const toggleMobileSidebar = () => {
+    setMobileSidebarOpen(!mobileSidebarOpen);
+};
+
 const startSidebarAnimation = () => {
     if (sidebarAnimationTimeoutId) {
         window.clearTimeout(sidebarAnimationTimeoutId);
@@ -475,21 +524,26 @@ const startSidebarAnimation = () => {
 };
 
 const setSidebarCollapsed = (collapsed, { animate = true } = {}) => {
+    const shouldDisableSidebarControls = collapsed && !isSidebarDrawerViewport();
     if (animate) {
         startSidebarAnimation();
     }
     document.body.classList.toggle("sidebar-collapsed", collapsed);
     if (userDropdownTrigger) {
-        userDropdownTrigger.setAttribute("aria-disabled", collapsed ? "true" : "false");
-        userDropdownTrigger.tabIndex = collapsed ? -1 : 0;
-        if (collapsed) {
+        userDropdownTrigger.setAttribute("aria-disabled", shouldDisableSidebarControls ? "true" : "false");
+        userDropdownTrigger.tabIndex = shouldDisableSidebarControls ? -1 : 0;
+        if (shouldDisableSidebarControls) {
             userDropdownTrigger.blur();
         }
     }
-    if (collapsed) {
+    if (shouldDisableSidebarControls) {
         closeUserDropdown();
     }
     if (!toggleSidebarBtn) {
+        return;
+    }
+    if (isSidebarDrawerViewport()) {
+        syncMobileSidebarUi();
         return;
     }
     toggleSidebarBtn.setAttribute("aria-pressed", collapsed ? "true" : "false");
@@ -500,9 +554,14 @@ const initSidebarState = () => {
     const fromStorage = window.localStorage.getItem(sidebarCollapsedStorageKey);
     const isCollapsed = fromStorage === "1";
     setSidebarCollapsed(isCollapsed, { animate: false });
+    syncMobileSidebarUi();
 };
 
 const toggleSidebarState = () => {
+    if (isSidebarDrawerViewport()) {
+        toggleMobileSidebar();
+        return;
+    }
     const nextCollapsed = !document.body.classList.contains("sidebar-collapsed");
     setSidebarCollapsed(nextCollapsed);
     if (nextCollapsed) {
@@ -556,7 +615,7 @@ const toggleUserDropdown = () => {
     if (!userDropdown || !userDropdownTrigger) {
         return;
     }
-    if (document.body.classList.contains("sidebar-collapsed")) {
+    if (!isSidebarDrawerViewport() && document.body.classList.contains("sidebar-collapsed")) {
         closeUserDropdown();
         return;
     }
@@ -879,6 +938,9 @@ const setActiveTab = (tabName) => {
     tabContents.forEach((content) => {
         content.classList.toggle("active", content.dataset.tabContent === tabName);
     });
+    if (isSidebarDrawerViewport()) {
+        setMobileSidebarOpen(false);
+    }
 };
 
 const matchSmartQuery = (query, searchableText) => {
@@ -4136,6 +4198,25 @@ const initTabs = () => {
 };
 
 const initEvents = () => {
+    if (mobileSidebarBtn) {
+        mobileSidebarBtn.addEventListener("click", () => {
+            toggleMobileSidebar();
+        });
+    }
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener("click", () => {
+            setMobileSidebarOpen(false);
+        });
+    }
+    window.addEventListener("resize", () => {
+        if (!isSidebarDrawerViewport()) {
+            setMobileSidebarOpen(false);
+            syncMobileSidebarUi();
+            return;
+        }
+        syncMobileSidebarUi();
+    });
+
     if (toggleSidebarBtn) {
         toggleSidebarBtn.addEventListener("click", toggleSidebarState);
     }
@@ -4154,6 +4235,15 @@ const initEvents = () => {
         });
     }
     document.addEventListener("click", (event) => {
+        if (isSidebarDrawerViewport() && mobileSidebarOpen) {
+            if (sidebarElement && mobileSidebarBtn) {
+                const clickedInsideSidebar = sidebarElement.contains(event.target);
+                const clickedTrigger = mobileSidebarBtn.contains(event.target);
+                if (!clickedInsideSidebar && !clickedTrigger) {
+                    setMobileSidebarOpen(false);
+                }
+            }
+        }
         if (!userDropdown || !userDropdown.classList.contains("is-open")) {
             return;
         }
@@ -4701,6 +4791,7 @@ const initEvents = () => {
         closeModal("bankFormModal");
         closeModal("bankDeleteModal");
         closeUserDropdown();
+        setMobileSidebarOpen(false);
     });
 };
 
