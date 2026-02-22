@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Finance Martins</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/login.css' %}">
+</head>
+<body>
+    <main class="login-layout">
+        <section class="login-card">
+            <p class="eyebrow">acesso restrito</p>
+            <h1>Finance Martins</h1>
+            <p class="lead">Entre com seu usuario para acessar o painel financeiro.</p>
+
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+                <label>
+                    Usuario
+                    <input type="text" name="username" autocomplete="username" required>
+                </label>
+                <label>
+                    Senha
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                {% if form.errors %}
+                <p class="error">Usuario ou senha invalidos.</p>
+                {% endif %}
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

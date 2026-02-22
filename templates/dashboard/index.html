@@ -1,0 +1,1078 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Martins</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body
+    data-create-url="{% url 'transaction_create' %}"
+    data-update-url-template="{% url 'transaction_update' 0 %}"
+    data-delete-url-template="{% url 'transaction_delete' 0 %}"
+    data-event-list-url="{% url 'event_list' %}"
+    data-event-create-url="{% url 'event_create' %}"
+    data-event-update-url-template="{% url 'event_update' 0 %}"
+    data-event-delete-url-template="{% url 'event_delete' 0 %}"
+    data-payable-create-url="{% url 'payable_create' %}"
+    data-payable-update-url-template="{% url 'payable_update' 0 %}"
+    data-payable-delete-url-template="{% url 'payable_delete' 0 %}"
+    data-payable-status-url-template="{% url 'payable_status_update' 0 %}"
+    data-payable-installment-bulk-url-template="{% url 'payable_installment_bulk_update' 0 %}"
+    data-payable-bulk-action-url="{% url 'payable_bulk_action' %}"
+    data-payable-receipt-upload-url-template="{% url 'payable_receipt_upload' 0 %}"
+    data-payable-receipt-delete-url-template="{% url 'payable_receipt_delete' 0 %}"
+    data-payable-history-url-template="{% url 'payable_history_list' 0 %}"
+    data-payable-category-create-url="{% url 'payable_category_create' %}"
+    data-payable-category-delete-url-template="{% url 'payable_category_delete' 0 %}"
+    data-bank-create-url="{% url 'bank_create' %}"
+    data-bank-delete-url-template="{% url 'bank_delete' 0 %}"
+    data-report-export-url="{% url 'report_export' %}"
+    data-layout-save-url="{% url 'dashboard_layout_save' %}"
+>
+    <div class="atmosphere"></div>
+    <div class="glow glow-left"></div>
+    <div class="glow glow-right"></div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-topbar">
+                <div class="brand">
+                    <span class="brand-dot"></span>
+                    <h1>Finance Martins</h1>
+                </div>
+                <button id="toggleSidebarBtn" class="icon-btn sidebar-toggle-btn" type="button" title="Abrir ou fechar menu">
+                    <i class="ph ph-sidebar-simple"></i>
+                </button>
+            </div>
+            <p class="brand-copy">Controle financeiro real com foco em velocidade.</p>
+            <div class="sidebar-sep"></div>
+            <ul class="menu" id="sidebarMenu">
+                <li class="menu-item active" data-tab="dashboard" tabindex="0">
+                    <i class="ph-duotone ph-gauge"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="menu-item" data-tab="calendar" tabindex="0">
+                    <i class="ph-duotone ph-calendar-blank"></i>
+                    <span>Agenda</span>
+                </li>
+                <li class="menu-item" data-tab="payables" tabindex="0">
+                    <i class="ph-duotone ph-wallet"></i>
+                    <span>Contas a pagar</span>
+                </li>
+                <li class="menu-item" data-tab="banks" tabindex="0">
+                    <i class="ph-duotone ph-bank"></i>
+                    <span>Bancos</span>
+                </li>
+            </ul>
+            <div class="sidebar-sep sidebar-sep-bottom"></div>
+            <div id="userDropdown" class="user-dropdown">
+                <button id="userDropdownTrigger" type="button" class="user-dropdown-trigger" aria-expanded="false">
+                    <span class="user-avatar">{{ request.user.username|slice:":1"|upper }}</span>
+                    <span class="user-meta">
+                        <strong>{{ request.user.username }}</strong>
+                        <small>Conectado</small>
+                    </span>
+                    <i class="ph ph-caret-down"></i>
+                </button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
+                    <p class="user-dropdown-name">{{ request.user.username }}</p>
+                    <div class="container-user-dropdown-actions">
+                        <button id="themeToggleBtn" type="button" class="btn btn-ghost theme-toggle-btn" aria-pressed="false">
+                            <i id="themeToggleIcon" class="ph ph-moon"></i>
+                            <span id="themeToggleLabel">Modo escuro</span>
+                        </button>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn sidebar-logout-btn">
+                                <i class="ph ph-sign-out"></i>
+                                <span>Sair da conta</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <section class="tab-content active" data-tab-content="dashboard">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">visao executiva</p>
+                        <h2>Painel Financeiro</h2>
+                    </div>
+                    <div class="top-actions">
+                        <div id="bankFilter" class="bank-filter"></div>
+                        <button id="openCreateModal" class="btn btn-primary">
+                            <i class="ph ph-plus"></i> Nova transacao
+                        </button>
+                    </div>
+                </header>
+
+                <div id="dashboardLayout" class="dashboard-layout">
+                    <section class="dashboard-widget" data-widget-id="summary_cards" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <section class="cards">
+                            <article class="card">
+                                <p>Saldo atual</p>
+                                <h3 id="summaryBalance">R$ 0,00</h3>
+                            </article>
+                            <article class="card">
+                                <p>Entradas</p>
+                                <h3 id="summaryIncome">R$ 0,00</h3>
+                            </article>
+                            <article class="card">
+                                <p>Saidas</p>
+                                <h3 id="summaryExpense">R$ 0,00</h3>
+                            </article>
+                            <article class="card">
+                                <p>Total de transacoes</p>
+                                <h3 id="summaryCount">0</h3>
+                            </article>
+                        </section>
+                    </section>
+
+                    <section class="dashboard-widget panel reminder-panel" data-widget-id="reminders" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head">
+                            <h4>Avisos e Lembretes</h4>
+                            <span id="dashboardRemindersSubtitle">Sem alertas no momento</span>
+                        </div>
+                        <ul id="dashboardRemindersList" class="reminder-list"></ul>
+                    </section>
+
+                    <section class="dashboard-widget panel reconciliation-panel" data-widget-id="reconciliation" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head">
+                            <h4>Conciliacao de comprovantes</h4>
+                            <span id="dashboardReconciliationSubtitle">Sem pendencias</span>
+                        </div>
+                        <ul id="dashboardReconciliationList" class="reconciliation-list"></ul>
+                    </section>
+
+                    <section class="dashboard-widget panel chart-panel" data-widget-id="monthly_chart" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head">
+                            <h4>Evolucao mensal</h4>
+                            <span>ultimos 6 meses</span>
+                        </div>
+                        <div id="balanceChart"></div>
+                    </section>
+
+                    <section class="dashboard-widget panel filters-panel" data-widget-id="search_filters" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head panel-head-inline">
+                            <h4>Pesquisa e filtros</h4>
+                        </div>
+                        <div class="filter-grid filter-grid-dashboard">
+                            <label class="filter-field">
+                                Pesquisar
+                                <input
+                                    type="text"
+                                    id="transactionSearchInput"
+                                    placeholder="Titulo, descricao, banco, valor ou data"
+                                >
+                            </label>
+                            <label class="filter-field">
+                                Tipo
+                                <select id="transactionTypeFilter">
+                                    <option value="all">Todos</option>
+                                    <option value="income">Entradas</option>
+                                    <option value="expense">Saidas</option>
+                                </select>
+                            </label>
+                            <label class="filter-field">
+                                Periodo
+                                <select id="transactionPeriodFilter">
+                                    <option value="all">Todo periodo</option>
+                                    <option value="today">Hoje</option>
+                                    <option value="last7">Ultimos 7 dias</option>
+                                    <option value="last30">Ultimos 30 dias</option>
+                                    <option value="this_month">Mes atual</option>
+                                </select>
+                            </label>
+                            <button id="clearTransactionFilters" class="btn btn-ghost filter-clear-btn" type="button">
+                                Limpar filtros
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-widget panel filters-panel" data-widget-id="reports" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head panel-head-inline">
+                            <h4>Relatorios</h4>
+                        </div>
+                        <div class="filter-grid filter-grid-reports">
+                            <label class="filter-field">
+                                Tipo
+                                <select id="reportTypeFilter">
+                                    <option value="cashflow">Entradas e saidas</option>
+                                    <option value="payables">Contas a pagar</option>
+                                </select>
+                            </label>
+                            <label class="filter-field">
+                                Banco
+                                <select id="reportBankFilter">
+                                    <option value="all">Todos os bancos</option>
+                                    {% for bank in banks %}
+                                    <option value="{{ bank.id }}">{{ bank.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label class="filter-field">
+                                Formato
+                                <select id="reportFormatFilter">
+                                    <option value="csv">CSV</option>
+                                    <option value="excel">Excel (.xls)</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </label>
+                            <label class="filter-field">
+                                Visao
+                                <select id="reportDetailLevelFilter">
+                                    <option value="both">Consolidado + detalhado</option>
+                                    <option value="consolidated">Somente consolidado</option>
+                                    <option value="detailed">Somente detalhado</option>
+                                </select>
+                            </label>
+                            <label class="filter-field">
+                                Data inicial
+                                <input type="date" id="reportStartDateFilter">
+                            </label>
+                            <label class="filter-field">
+                                Data final
+                                <input type="date" id="reportEndDateFilter">
+                            </label>
+                            <button id="exportReportBtn" class="btn btn-primary filter-clear-btn" type="button">
+                                <i class="ph ph-download-simple"></i> Exportar
+                            </button>
+                        </div>
+                        <p id="reportExportError" class="form-error"></p>
+                    </section>
+
+                    <section class="dashboard-widget panel table-panel" data-widget-id="transactions_table" draggable="true">
+                        <button type="button" class="widget-drag-handle" title="Arrastar componente">
+                            <i class="ph ph-dots-six-vertical"></i>
+                        </button>
+                        <div class="panel-head">
+                            <h4>Transacoes</h4>
+                            <span id="transactionsSubtitle">Visualizando todas</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Titulo</th>
+                                        <th>Banco</th>
+                                        <th>Tipo</th>
+                                        <th>Valor</th>
+                                        <th>Acoes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section class="tab-content" data-tab-content="calendar">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">agenda</p>
+                        <h2>Calendario e Lembretes</h2>
+                    </div>
+                    <div class="top-actions">
+                        <button id="openEventModal" class="btn btn-primary">
+                            <i class="ph ph-plus"></i> Novo evento
+                        </button>
+                    </div>
+                </header>
+
+                <section class="cards">
+                    <article class="card">
+                        <p>Total de eventos</p>
+                        <h3 id="summaryEventTotal">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Pendentes</p>
+                        <h3 id="summaryEventPending">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Concluidos</p>
+                        <h3 id="summaryEventCompleted">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Criticos</p>
+                        <h3 id="summaryEventCritical">0</h3>
+                    </article>
+                </section>
+
+                <section class="panel filters-panel">
+                    <div class="panel-head panel-head-inline">
+                        <h4>Pesquisa e filtros</h4>
+                    </div>
+                    <div class="filter-grid filter-grid-events">
+                        <label class="filter-field">
+                            Pesquisar
+                            <input
+                                type="text"
+                                id="eventSearchInput"
+                                placeholder="Titulo, descricao, local, criador, data"
+                            >
+                        </label>
+                        <label class="filter-field">
+                            Status
+                            <select id="eventStatusFilter">
+                                <option value="all">Todos</option>
+                                <option value="pending">Pendente</option>
+                                <option value="completed">Concluido</option>
+                                <option value="canceled">Cancelado</option>
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Importancia
+                            <select id="eventImportanceFilter">
+                                <option value="all">Todas</option>
+                                <option value="critical">Critica</option>
+                                <option value="high">Alta</option>
+                                <option value="medium">Media</option>
+                                <option value="low">Baixa</option>
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Visualizacao
+                            <select id="eventViewFilter">
+                                <option value="month">Mensal</option>
+                                <option value="week">Semanal</option>
+                                <option value="agenda">Agenda</option>
+                            </select>
+                        </label>
+                        <button id="clearEventFilters" class="btn btn-ghost filter-clear-btn" type="button">
+                            Limpar filtros
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel event-calendar-panel">
+                    <div class="event-calendar-head">
+                        <div class="event-calendar-nav">
+                            <button id="eventPrevBtn" type="button" class="btn btn-ghost">
+                                <i class="ph ph-caret-left"></i> Anterior
+                            </button>
+                            <button id="eventTodayBtn" type="button" class="btn btn-ghost">Hoje</button>
+                            <button id="eventNextBtn" type="button" class="btn btn-ghost">
+                                Proximo <i class="ph ph-caret-right"></i>
+                            </button>
+                        </div>
+                        <strong id="eventCurrentPeriod">-</strong>
+                    </div>
+                    <div id="eventViewContainer" class="event-view-container"></div>
+                </section>
+
+                <section class="panel reminder-panel">
+                    <div class="panel-head">
+                        <h4>Lembretes da agenda</h4>
+                        <span id="eventReminderSubtitle">Sem alertas no momento</span>
+                    </div>
+                    <ul id="eventReminderList" class="event-reminder-list"></ul>
+                </section>
+            </section>
+
+            <section class="tab-content" data-tab-content="payables">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">contas</p>
+                        <h2>Contas a Pagar</h2>
+                    </div>
+                    <div class="top-actions">
+                        <button id="openPayableModal" class="btn btn-primary">
+                            <i class="ph ph-plus"></i> Nova conta
+                        </button>
+                    </div>
+                </header>
+
+                <section class="cards">
+                    <article class="card">
+                        <p>Pendente</p>
+                        <h3 id="summaryPayablePending">R$ 0,00</h3>
+                    </article>
+                    <article class="card">
+                        <p>Vencido</p>
+                        <h3 id="summaryPayableOverdue">R$ 0,00</h3>
+                    </article>
+                    <article class="card">
+                        <p>Pago</p>
+                        <h3 id="summaryPayablePaid">R$ 0,00</h3>
+                    </article>
+                    <article class="card">
+                        <p>Total de contas</p>
+                        <h3 id="summaryPayableCount">0</h3>
+                    </article>
+                </section>
+
+                <section class="panel filters-panel">
+                    <div class="panel-head panel-head-inline">
+                        <h4>Pesquisa e filtros</h4>
+                    </div>
+                    <div class="filter-grid filter-grid-payables">
+                        <label class="filter-field">
+                            Pesquisar
+                            <input
+                                type="text"
+                                id="payableSearchInput"
+                                placeholder="Titulo, categoria, parcela, status, banco ou valor"
+                            >
+                        </label>
+                        <label class="filter-field">
+                            Status
+                            <select id="payableStatusFilter">
+                                <option value="all">Todos</option>
+                                <option value="pending">Pendentes</option>
+                                <option value="overdue">Vencidas</option>
+                                <option value="paid">Pagas</option>
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Tipo base
+                            <select id="payableTypeFilter">
+                                <option value="all">Todas</option>
+                                <option value="invoice">Fatura</option>
+                                <option value="subscription">Assinatura</option>
+                                <option value="debt">Divida</option>
+                                <option value="installment">Parcela</option>
+                                <option value="other">Outro</option>
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Categoria custom
+                            <select id="payableCategoryFilter">
+                                <option value="all">Todas</option>
+                                <option value="none">Sem categoria</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Banco
+                            <select id="payableBankFilter">
+                                <option value="all">Todos</option>
+                                <option value="none">Sem banco</option>
+                                {% for bank in banks %}
+                                <option value="{{ bank.id }}">{{ bank.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label class="filter-field">
+                            Vencimento
+                            <select id="payablePeriodFilter">
+                                <option value="all">Todo periodo</option>
+                                <option value="today">Hoje</option>
+                                <option value="next7">Proximos 7 dias</option>
+                                <option value="this_month">Mes atual</option>
+                                <option value="overdue">Somente vencidas</option>
+                            </select>
+                        </label>
+                        <button id="clearPayableFilters" class="btn btn-ghost filter-clear-btn" type="button">
+                            Limpar filtros
+                        </button>
+                    </div>
+                </section>
+
+                <section class="payables-utility-grid">
+                    <section class="panel">
+                        <div class="panel-head panel-head-inline">
+                            <h4>Acoes em massa</h4>
+                        </div>
+                        <div class="payable-bulk-grid">
+                            <label class="filter-field">
+                                Acao
+                                <select id="payableBulkActionField">
+                                    <option value="mark_paid">Marcar filtradas como pagas</option>
+                                    <option value="mark_pending">Marcar filtradas como pendentes</option>
+                                    <option value="delete">Excluir filtradas</option>
+                                </select>
+                            </label>
+                            <label class="filter-field" id="payableBulkPaymentDateWrap">
+                                Data pagamento
+                                <input type="date" id="payableBulkPaymentDateField">
+                            </label>
+                            <label class="filter-field full-width" id="payableBulkPaymentNoteWrap">
+                                Observacao pagamento
+                                <input type="text" id="payableBulkPaymentNoteField" maxlength="255" placeholder="Opcional">
+                            </label>
+                            <button id="applyPayableBulkActionBtn" type="button" class="btn btn-primary">
+                                Aplicar em massa
+                            </button>
+                        </div>
+                        <p id="payableBulkSummary" class="details-summary"></p>
+                        <p id="payableBulkActionError" class="form-error"></p>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-head panel-head-inline">
+                            <h4>Categorias customizadas</h4>
+                        </div>
+                        <form id="payableCategoryForm" class="payable-category-form">
+                            <label class="filter-field">
+                                Nome
+                                <input type="text" id="payableCategoryNameField" name="name" maxlength="80" required>
+                            </label>
+                            <label class="filter-field">
+                                Cor
+                                <input type="color" id="payableCategoryColorField" name="color" value="#5D7084">
+                            </label>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </form>
+                        <p id="payableCategoryFormError" class="form-error"></p>
+                        <div id="payableCategoryList" class="payable-category-list"></div>
+                    </section>
+                </section>
+
+                <section class="panel payable-calendar-panel">
+                    <div class="panel-head">
+                        <h4>Calendario de vencimentos</h4>
+                        <span id="payableCalendarSelectionLabel">Nenhum dia selecionado</span>
+                    </div>
+                    <div class="payable-calendar-head">
+                        <button id="payableCalendarPrevBtn" type="button" class="btn btn-ghost">Mes anterior</button>
+                        <strong id="payableCalendarMonthLabel"></strong>
+                        <div class="payable-calendar-head-actions">
+                            <button id="payableCalendarTodayBtn" type="button" class="btn btn-ghost">Hoje</button>
+                            <button id="payableCalendarClearBtn" type="button" class="btn btn-ghost">Limpar dia</button>
+                            <button id="payableCalendarNextBtn" type="button" class="btn btn-ghost">Proximo mes</button>
+                        </div>
+                    </div>
+                    <div id="payableCalendarGrid" class="payable-calendar-grid"></div>
+                </section>
+
+                <section class="panel table-panel">
+                    <div class="panel-head">
+                        <h4>Lista de contas</h4>
+                        <span id="payablesSubtitle">Faturas, assinaturas, dividas e parcelas</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vencimento</th>
+                                    <th>Titulo</th>
+                                    <th>Categoria</th>
+                                    <th>Banco</th>
+                                    <th>Status</th>
+                                    <th>Parcela</th>
+                                    <th>Valor</th>
+                                    <th>Acoes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payablesBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+
+            <section class="tab-content" data-tab-content="banks">
+                <header class="topbar">
+                    <div>
+                        <p class="eyebrow">cadastro</p>
+                        <h2>Bancos</h2>
+                    </div>
+                    <div class="top-actions">
+                        <button id="openBankModal" class="btn btn-primary">
+                            <i class="ph ph-plus"></i> Novo banco
+                        </button>
+                    </div>
+                </header>
+
+                <section class="cards">
+                    <article class="card">
+                        <p>Total de bancos</p>
+                        <h3 id="summaryBankCount">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Com transacoes</p>
+                        <h3 id="summaryBankInUse">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Sem uso</p>
+                        <h3 id="summaryBankUnused">0</h3>
+                    </article>
+                    <article class="card">
+                        <p>Com contas a pagar</p>
+                        <h3 id="summaryBankPayables">0</h3>
+                    </article>
+                </section>
+
+                <section class="panel table-panel">
+                    <div class="panel-head">
+                        <h4>Lista de bancos</h4>
+                        <span id="banksSubtitle">Gerencie bancos e icones</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Banco</th>
+                                    <th>Slug</th>
+                                    <th>Cor</th>
+                                    <th>Uso</th>
+                                    <th>Acoes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="banksBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div id="formModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="formModalTitle">Nova transacao</h3>
+                <button type="button" class="icon-btn" data-close-modal="formModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="transactionForm">
+                <input type="hidden" id="transactionId" name="transaction_id">
+                <div class="form-grid">
+                    <label>
+                        Titulo
+                        <input type="text" id="titleField" name="title" required maxlength="120">
+                    </label>
+                    <label>
+                        Banco
+                        <select id="bankField" name="bank" required>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        Tipo
+                        <select id="typeField" name="transaction_type" required>
+                            <option value="income">Entrada</option>
+                            <option value="expense">Saida</option>
+                        </select>
+                    </label>
+                    <label>
+                        Valor
+                        <input type="number" id="amountField" name="amount" min="0.01" step="0.01" required>
+                    </label>
+                    <label>
+                        Data
+                        <input type="date" id="dateField" name="transaction_date" required>
+                    </label>
+                    <label class="full-width">
+                        Descricao
+                        <input type="text" id="descriptionField" name="description" maxlength="255" placeholder="Opcional">
+                    </label>
+                </div>
+                <p id="formError" class="form-error"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close-modal="formModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="submitTransactionBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Remover transacao</h3>
+                <button type="button" class="icon-btn" data-close-modal="deleteModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p class="delete-copy">Essa acao nao pode ser desfeita. Deseja continuar?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="deleteModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="eventFormModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="eventModalTitle">Novo evento</h3>
+                <button type="button" class="icon-btn" data-close-modal="eventFormModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="eventForm">
+                <input type="hidden" id="eventIdField" name="event_id">
+                <div class="form-grid">
+                    <label>
+                        Titulo
+                        <input type="text" id="eventTitleField" name="title" required maxlength="140">
+                    </label>
+                    <label>
+                        Criador/Responsavel
+                        <input type="text" id="eventCreatorField" name="creator_name" maxlength="120" placeholder="Opcional">
+                    </label>
+                    <label>
+                        Inicio
+                        <input type="datetime-local" id="eventStartsAtField" name="starts_at" required>
+                    </label>
+                    <label>
+                        Fim (opcional)
+                        <input type="datetime-local" id="eventEndsAtField" name="ends_at">
+                    </label>
+                    <label>
+                        Importancia
+                        <select id="eventImportanceField" name="importance">
+                            <option value="low">Baixa</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="high">Alta</option>
+                            <option value="critical">Critica</option>
+                        </select>
+                    </label>
+                    <label>
+                        Status
+                        <select id="eventStatusField" name="status">
+                            <option value="pending">Pendente</option>
+                            <option value="completed">Concluido</option>
+                            <option value="canceled">Cancelado</option>
+                        </select>
+                    </label>
+                    <label>
+                        Cor
+                        <input type="color" id="eventColorField" name="color" value="#4F46E5">
+                    </label>
+                    <label>
+                        Lembrete (min antes)
+                        <input type="number" id="eventReminderField" name="reminder_minutes_before" min="0" step="5" value="60">
+                    </label>
+                    <label class="full-width">
+                        Local
+                        <input type="text" id="eventLocationField" name="location" maxlength="120" placeholder="Opcional">
+                    </label>
+                    <label id="eventAllDayRow" class="full-width toggle-row">
+                        <input type="checkbox" id="eventAllDayField" name="all_day">
+                        Evento de dia inteiro
+                    </label>
+                    <label class="full-width">
+                        Descricao
+                        <input type="text" id="eventDescriptionField" name="description" maxlength="500" placeholder="Opcional">
+                    </label>
+                </div>
+                <p id="eventFormError" class="form-error"></p>
+                <div class="modal-actions event-modal-actions">
+                    <button type="button" class="btn btn-danger is-hidden" id="eventDeleteFromFormBtn">Remover</button>
+                    <button type="button" class="btn btn-ghost" data-close-modal="eventFormModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="eventFormSubmitBtn">Salvar evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="eventDeleteModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Remover evento</h3>
+                <button type="button" class="icon-btn" data-close-modal="eventDeleteModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p class="delete-copy">Essa acao nao pode ser desfeita. Deseja continuar?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="eventDeleteModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmEventDeleteBtn">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="payableFormModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="payableModalTitle">Nova conta a pagar</h3>
+                <button type="button" class="icon-btn" data-close-modal="payableFormModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="payableForm">
+                <input type="hidden" id="payableId" name="payable_id">
+                <div class="form-grid">
+                    <label>
+                        Titulo
+                        <input type="text" id="payableTitleField" name="title" required maxlength="120">
+                    </label>
+                    <label>
+                        Categoria
+                        <select id="payableTypeField" name="payable_type" required>
+                            <option value="invoice">Fatura</option>
+                            <option value="subscription">Assinatura</option>
+                            <option value="debt">Divida</option>
+                            <option value="installment">Parcela</option>
+                            <option value="other">Outro</option>
+                        </select>
+                    </label>
+                    <label>
+                        Categoria custom (opcional)
+                        <select id="payableCategoryField" name="category">
+                            <option value="">Sem categoria</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        Banco (opcional)
+                        <select id="payableBankField" name="bank">
+                            <option value="">Sem banco</option>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        Status
+                        <select id="payableStatusField" name="status" required>
+                            <option value="pending">Pendente</option>
+                            <option value="paid">Pago</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span id="payableAmountLabel">Valor</span>
+                        <input type="number" id="payableAmountField" name="amount" min="0.01" step="0.01" required>
+                    </label>
+                    <label>
+                        Vencimento
+                        <input type="date" id="payableDueDateField" name="due_date" required>
+                    </label>
+                    <label>
+                        Data de pagamento
+                        <input type="date" id="payablePaymentDateField" name="payment_date">
+                    </label>
+                    <div id="installmentFields" class="full-width inline-grid is-hidden">
+                        <input type="hidden" id="payableInstallmentNumberField" name="installment_number" value="1">
+                        <label>
+                            Total de parcelas
+                            <input type="number" id="payableInstallmentTotalField" name="installment_total" min="1">
+                        </label>
+                        <p id="installmentAmountPreview" class="installment-preview full-width"></p>
+                    </div>
+                    <label id="recurringFieldRow" class="full-width toggle-row is-hidden">
+                        <input type="checkbox" id="payableRecurringField" name="is_recurring">
+                        Cobranca recorrente
+                    </label>
+                    <label class="full-width">
+                        Observacao do pagamento
+                        <input type="text" id="payablePaymentNoteField" name="payment_note" maxlength="255" placeholder="Opcional">
+                    </label>
+                    <label class="full-width">
+                        Descricao
+                        <input type="text" id="payableDescriptionField" name="description" maxlength="255" placeholder="Opcional">
+                    </label>
+                </div>
+                <p id="payableFormError" class="form-error"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close-modal="payableFormModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="payableDeleteModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Remover conta</h3>
+                <button type="button" class="icon-btn" data-close-modal="payableDeleteModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p class="delete-copy">Essa acao nao pode ser desfeita. Deseja continuar?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="payableDeleteModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmPayableDeleteBtn">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installmentDetailsModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="installmentDetailsTitle">Detalhes das parcelas</h3>
+                <button type="button" class="icon-btn" data-close-modal="installmentDetailsModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p id="installmentDetailsSummary" class="details-summary"></p>
+            <div class="container-payment-details">
+                <div class="installment-bulk-panel">
+                    <div class="installment-bulk-grid">
+                        <label>
+                            Data pagamento
+                            <input type="date" id="installmentPaymentDate">
+                        </label>
+                        <label class="full-width">
+                            Observacao pagamento
+                            <input type="text" id="installmentPaymentNote" maxlength="255" placeholder="Opcional">
+                        </label>
+                        <label>
+                            Marcar 1..N
+                            <select id="installmentBulkUntil"></select>
+                        </label>
+                        <button type="button" class="btn btn-ghost" id="installmentPayUntilBtn">Marcar 1..N pago</button>
+                        <button type="button" class="btn btn-primary" id="installmentPayAllBtn">Pagar tudo</button>
+                        <button type="button" class="btn btn-danger" id="installmentReopenAllBtn">Reabrir tudo</button>
+                    </div>
+                    <p id="installmentBulkError" class="form-error"></p>
+                </div>
+                <div class="table-wrap details-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parcela</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Pagamento</th>
+                                <th>Obs</th>
+                                <th>Valor</th>
+                                <th>Acoes e comprovante</th>
+                            </tr>
+                        </thead>
+                        <tbody id="installmentDetailsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receiptPromptModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Anexar comprovante</h3>
+                <button type="button" class="icon-btn" data-close-modal="receiptPromptModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p id="receiptPromptMessage" class="delete-copy">Deseja anexar comprovante agora?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="receiptPromptModal">Nao</button>
+                <button type="button" class="btn btn-primary" id="receiptPromptYesBtn">Sim</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="receiptUploadModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3 id="receiptUploadTitle">Comprovante</h3>
+                <button type="button" class="icon-btn" data-close-modal="receiptUploadModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p id="receiptUploadMeta" class="details-summary"></p>
+            <p id="receiptUploadCurrent" class="receipt-upload-current"></p>
+            <div id="receiptPreviewArea" class="receipt-preview-area">
+                <p class="receipt-preview-empty">Nenhum comprovante para visualizar.</p>
+            </div>
+            <label class="full-width">
+                Arquivo do comprovante
+                <input type="file" id="receiptFileField" accept=".pdf,.png,.jpg,.jpeg,.webp">
+            </label>
+            <p id="receiptUploadError" class="form-error"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="receiptUploadModal">Cancelar</button>
+                <button type="button" class="btn btn-danger is-hidden" id="receiptDeleteBtn">Excluir comprovante</button>
+                <button type="button" class="btn btn-primary" id="receiptUploadSubmitBtn">Anexar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installmentHistoryModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3 id="installmentHistoryTitle">Historico da parcela</h3>
+                <button type="button" class="icon-btn" data-close-modal="installmentHistoryModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p id="installmentHistoryMeta" class="details-summary"></p>
+            <ul id="installmentHistoryList" class="installment-history-list"></ul>
+            <p id="installmentHistoryError" class="form-error"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="installmentHistoryModal">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bankFormModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Novo banco</h3>
+                <button type="button" class="icon-btn" data-close-modal="bankFormModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="bankForm">
+                <div class="form-grid">
+                    <label class="full-width">
+                        Nome
+                        <input type="text" id="bankNameField" name="name" maxlength="80" required>
+                    </label>
+                    <label>
+                        Cor
+                        <input type="color" id="bankColorField" name="color" value="#4F46E5" required>
+                    </label>
+                    <label>
+                        Icone (Phosphor)
+                        <input type="text" id="bankIconField" name="icon" value="ph-bank" placeholder="ph-bank">
+                    </label>
+                </div>
+                <p id="bankFormError" class="form-error"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close-modal="bankFormModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar banco</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="bankDeleteModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card modal-sm">
+            <div class="modal-head">
+                <h3>Remover banco</h3>
+                <button type="button" class="icon-btn" data-close-modal="bankDeleteModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <p class="delete-copy">Deseja remover este banco? Transacoes vinculadas impedem exclusao.</p>
+            <p id="bankDeleteError" class="form-error"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close-modal="bankDeleteModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmBankDeleteBtn">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    {{ dashboard_data|json_script:"dashboard-data" }}
+    <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+</body>
+</html>

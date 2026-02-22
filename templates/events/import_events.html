@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importar Eventos JSON</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f6f8fb;
+      color: #1f2937;
+    }
+    .wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.06);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+    p {
+      margin: 0 0 18px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      font-size: 14px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    button {
+      border: 0;
+      background: #2563eb;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    button:hover { filter: brightness(.97); }
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .ghost {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+    .status {
+      margin-top: 16px;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      display: none;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .status.show { display: block; }
+    .status.info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .status.success {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .status.error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .summary {
+      margin-top: 14px;
+      display: none;
+      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .summary.show { display: grid; }
+    .pill {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .pill strong {
+      display: block;
+      font-size: 16px;
+      color: #111827;
+    }
+    .pill span {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .errors {
+      margin-top: 14px;
+      display: none;
+    }
+    .errors.show { display: block; }
+    .errors h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .errors-box {
+      max-height: 220px;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px;
+    }
+    .errors-box ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .errors-box li { margin: 6px 0; }
+    .hint {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Importar eventos via JSON</h1>
+      <p>Envie um arquivo JSON no formato de lista (fixture antiga) para criar eventos vinculados ao usuário logado.</p>
+
+      <form id="importForm" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="json_file">Arquivo JSON</label>
+          <input type="file" id="json_file" name="json_file" accept=".json,application/json" required />
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="submitBtn">Importar</button>
+          <button type="button" id="clearBtn" class="ghost">Limpar resultado</button>
+        </div>
+      </form>
+
+      <div id="statusBox" class="status info"></div>
+
+      <div id="summaryBox" class="summary">
+        <div class="pill">
+          <strong id="importedCount">0</strong>
+          <span>Importados</span>
+        </div>
+        <div class="pill">
+          <strong id="skippedCount">0</strong>
+          <span>Ignorados</span>
+        </div>
+        <div class="pill">
+          <strong id="errorCount">0</strong>
+          <span>Erros</span>
+        </div>
+      </div>
+
+      <div id="errorsWrap" class="errors">
+        <h3>Detalhes dos erros</h3>
+        <div class="errors-box">
+          <ul id="errorsList"></ul>
+        </div>
+      </div>
+
+      <div class="hint">
+        Dica: se importar o mesmo arquivo mais de uma vez, poderá gerar eventos duplicados.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById("importForm");
+      const fileInput = document.getElementById("json_file");
+      const submitBtn = document.getElementById("submitBtn");
+      const clearBtn = document.getElementById("clearBtn");
+
+      const statusBox = document.getElementById("statusBox");
+      const summaryBox = document.getElementById("summaryBox");
+      const importedCount = document.getElementById("importedCount");
+      const skippedCount = document.getElementById("skippedCount");
+      const errorCount = document.getElementById("errorCount");
+
+      const errorsWrap = document.getElementById("errorsWrap");
+      const errorsList = document.getElementById("errorsList");
+
+      function getCsrfToken() {
+        const el = document.querySelector("[name=csrfmiddlewaretoken]");
+        return el ? el.value : "";
+      }
+
+      function setStatus(message, type = "info") {
+        statusBox.className = `status show ${type}`;
+        statusBox.textContent = message;
+      }
+
+      function resetUI() {
+        statusBox.className = "status info";
+        statusBox.textContent = "";
+        statusBox.classList.remove("show");
+
+        summaryBox.classList.remove("show");
+        importedCount.textContent = "0";
+        skippedCount.textContent = "0";
+        errorCount.textContent = "0";
+
+        errorsWrap.classList.remove("show");
+        errorsList.innerHTML = "";
+      }
+
+      function renderErrors(errors) {
+        errorsList.innerHTML = "";
+        if (!Array.isArray(errors) || !errors.length) {
+          errorsWrap.classList.remove("show");
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        errors.forEach(err => {
+          const li = document.createElement("li");
+          li.textContent = String(err);
+          frag.appendChild(li);
+        });
+        errorsList.appendChild(frag);
+        errorsWrap.classList.add("show");
+      }
+
+      clearBtn.addEventListener("click", () => {
+        resetUI();
+        form.reset();
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        resetUI();
+
+        const file = fileInput.files[0];
+        if (!file) {
+          setStatus("Selecione um arquivo JSON.", "error");
+          return;
+        }
+
+        const isJsonByName = file.name.toLowerCase().endsWith(".json");
+        const isJsonByType = file.type === "application/json" || file.type === "";
+        if (!isJsonByName && !isJsonByType) {
+          setStatus("Arquivo inválido. Envie um .json", "error");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        setStatus("Enviando e processando arquivo...", "info");
+
+        try {
+          const formData = new FormData();
+          formData.append("json_file", file);
+
+          const response = await fetch(window.location.href, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCsrfToken(),
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+          });
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            const msg = data.message || "Erro ao importar arquivo.";
+            setStatus(msg, "error");
+            if (Array.isArray(data.errors)) {
+              renderErrors(data.errors);
+              errorCount.textContent = String(data.errors.length);
+              summaryBox.classList.add("show");
+            }
+            return;
+          }
+
+          importedCount.textContent = String(data.imported || 0);
+          skippedCount.textContent = String(data.skipped || 0);
+          errorCount.textContent = String((data.errors || []).length);
+          summaryBox.classList.add("show");
+
+          renderErrors(data.errors || []);
+
+          setStatus(
+            data.message || `Importação concluída. Importados: ${data.imported || 0} | Ignorados: ${data.skipped || 0}`,
+            "success"
+          );
+
+        } catch (error) {
+          setStatus("Falha de comunicação com o servidor. Verifique sua conexão e tente novamente.", "error");
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
