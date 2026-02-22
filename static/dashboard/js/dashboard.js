@@ -70,6 +70,7 @@ const dashboardLayoutContainer = document.getElementById("dashboardLayout");
 const sidebarCollapsedStorageKey = "financepulse:sidebar-collapsed";
 const dashboardLayoutStorageKey = "financepulse:dashboard-layout";
 const themeModeStorageKey = "financepulse:theme-mode";
+let sidebarAnimationTimeoutId = null;
 let draggedDashboardWidgetId = null;
 let canDragWidgetId = null;
 let pendingDragPointerY = null;
@@ -461,7 +462,21 @@ const triggerSuccessFeedback = (element) => {
     }, 760);
 };
 
-const setSidebarCollapsed = (collapsed) => {
+const startSidebarAnimation = () => {
+    if (sidebarAnimationTimeoutId) {
+        window.clearTimeout(sidebarAnimationTimeoutId);
+    }
+    document.body.classList.add("sidebar-animating");
+    sidebarAnimationTimeoutId = window.setTimeout(() => {
+        document.body.classList.remove("sidebar-animating");
+        sidebarAnimationTimeoutId = null;
+    }, 220);
+};
+
+const setSidebarCollapsed = (collapsed, { animate = true } = {}) => {
+    if (animate) {
+        startSidebarAnimation();
+    }
     document.body.classList.toggle("sidebar-collapsed", collapsed);
     if (userDropdownTrigger) {
         userDropdownTrigger.setAttribute("aria-disabled", collapsed ? "true" : "false");
@@ -483,7 +498,7 @@ const setSidebarCollapsed = (collapsed) => {
 const initSidebarState = () => {
     const fromStorage = window.localStorage.getItem(sidebarCollapsedStorageKey);
     const isCollapsed = fromStorage === "1";
-    setSidebarCollapsed(isCollapsed);
+    setSidebarCollapsed(isCollapsed, { animate: false });
 };
 
 const toggleSidebarState = () => {

@@ -26,7 +26,7 @@ from .views import (
     transaction_create,
     transaction_delete,
     transaction_update,
-    import_events_json
+    # import_events_json
 )
 
 urlpatterns = [
@@ -112,5 +112,5 @@ urlpatterns = [
         report_export,
         name="report_export",
     ),
-     path("events/importar-json/", import_events_json, name="import_events_json"),
+    #  path("events/importar-json/", import_events_json, name="import_events_json"),
 ]
