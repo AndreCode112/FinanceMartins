@@ -960,12 +960,24 @@
     </div>
 
     <div id="installmentDetailsModal" class="modal hidden" aria-hidden="true">
-        <div class="modal-card">
+        <div id="installmentDetailsModalCard" class="modal-card installment-details-modal-card">
             <div class="modal-head">
                 <h3 id="installmentDetailsTitle">Detalhes das parcelas</h3>
-                <button type="button" class="icon-btn" data-close-modal="installmentDetailsModal">
-                    <i class="ph ph-x"></i>
-                </button>
+                <div class="modal-head-actions">
+                    <button
+                        type="button"
+                        class="icon-btn modal-expand-btn"
+                        id="installmentDetailsExpandBtn"
+                        aria-label="Expandir para tela cheia"
+                        aria-pressed="false"
+                        title="Expandir para tela cheia"
+                    >
+                        <i class="ph ph-corners-out"></i>
+                    </button>
+                    <button type="button" class="icon-btn" data-close-modal="installmentDetailsModal">
+                        <i class="ph ph-x"></i>
+                    </button>
+                </div>
             </div>
             <p id="installmentDetailsSummary" class="details-summary"></p>
             <div class="container-payment-details">

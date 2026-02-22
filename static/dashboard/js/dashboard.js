@@ -192,6 +192,8 @@ const confirmEventDeleteBtn = document.getElementById("confirmEventDeleteBtn");
 const payableFormModal = document.getElementById("payableFormModal");
 const payableDeleteModal = document.getElementById("payableDeleteModal");
 const installmentDetailsModal = document.getElementById("installmentDetailsModal");
+const installmentDetailsModalCard = document.getElementById("installmentDetailsModalCard");
+const installmentDetailsExpandBtn = document.getElementById("installmentDetailsExpandBtn");
 const payableModalTitle = document.getElementById("payableModalTitle");
 const payableForm = document.getElementById("payableForm");
 const payableIdField = document.getElementById("payableId");
@@ -868,6 +870,36 @@ const openModal = (modalId) => {
     modal.setAttribute("aria-hidden", "false");
 };
 
+const setInstallmentDetailsModalExpanded = (expanded) => {
+    if (!installmentDetailsModal || !installmentDetailsModalCard || !installmentDetailsExpandBtn) {
+        return;
+    }
+    installmentDetailsModal.classList.toggle("modal-expanded", expanded);
+    installmentDetailsModalCard.classList.toggle("is-expanded", expanded);
+    installmentDetailsExpandBtn.classList.toggle("is-active", expanded);
+    installmentDetailsExpandBtn.setAttribute("aria-pressed", expanded ? "true" : "false");
+    installmentDetailsExpandBtn.setAttribute(
+        "aria-label",
+        expanded ? "Restaurar tamanho do modal" : "Expandir para tela cheia",
+    );
+    installmentDetailsExpandBtn.setAttribute(
+        "title",
+        expanded ? "Restaurar tamanho do modal" : "Expandir para tela cheia",
+    );
+    const icon = installmentDetailsExpandBtn.querySelector("i");
+    if (icon) {
+        icon.className = expanded ? "ph ph-corners-in" : "ph ph-corners-out";
+    }
+};
+
+const toggleInstallmentDetailsModalExpanded = () => {
+    if (!installmentDetailsModal) {
+        return;
+    }
+    const isExpanded = installmentDetailsModal.classList.contains("modal-expanded");
+    setInstallmentDetailsModalExpanded(!isExpanded);
+};
+
 const closeModal = (modalId) => {
     const modal = document.getElementById(modalId);
     if (!modal) {
@@ -885,6 +917,7 @@ const closeModal = (modalId) => {
         eventDeleteCandidateId = null;
     }
     if (modalId === "installmentDetailsModal") {
+        setInstallmentDetailsModalExpanded(false);
         activeInstallmentDetailsId = null;
         pendingReceiptPromptInstallmentId = null;
         receiptUploadInstallmentId = null;
@@ -4733,6 +4766,9 @@ const initEvents = () => {
         installmentReopenAllBtn.addEventListener("click", () => {
             submitInstallmentBulkAction("reopen_all");
         });
+    }
+    if (installmentDetailsExpandBtn) {
+        installmentDetailsExpandBtn.addEventListener("click", toggleInstallmentDetailsModalExpanded);
     }
     if (eventDeleteFromFormBtn) {
         eventDeleteFromFormBtn.addEventListener("click", () => {
